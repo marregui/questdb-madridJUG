@@ -120,8 +120,6 @@ public class SameProcess {
                             .$(", factoryType: ").$(factoryType)
                             .$(", event: ").$(event)
                             .$();
-                    if (factoryType == PoolListener.SRC_WRITER) {
-                    }
                     if (isOurTable && factoryType == PoolListener.SRC_WRITER && event == PoolListener.EV_UNLOCKED) {
                         dataReady.countDown();
                     }
