@@ -79,7 +79,6 @@ public class Utils {
                     writer.println("cairo.o3.max.lag=10000");
                     writer.println("cairo.o3.min.lag=2000");
                     writer.println("cairo.sql.jit.mode=on");
-                    writer.println("cairo.sql.jit.mode=on");
                 }
 
                 // configure logging: https://questdb.io/docs/reference/configuration/#logging
@@ -87,7 +86,7 @@ public class Utils {
                 String file = path.toString();
                 System.setProperty("out", file);
                 try (PrintWriter writer = new PrintWriter(file, StandardCharsets.UTF_8)) {
-                    writer.println("writers=file"); // list of configured writers
+                    writer.println("writers=stdout"); // list of configured writers
                     // stdout
                     writer.println("w.stdout.class=io.questdb.log.LogConsoleWriter");
                     writer.println("w.stdout.level=INFO,ERROR");

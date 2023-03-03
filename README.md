@@ -1,28 +1,44 @@
 
 # questdb-madridJUG
 
-## 1. De donde sale el proyecto? 
+## De donde sale el proyecto? 
 
-QuestDB nacio como proyecto personal en 2014, en el contexto de tener que analizar series 
-temporales con una base de datos relacional no especializada.
-Este tipo de datos es producido de continuo, en gran cantidad, y mientras esto ocurre, la 
+[QuestDB](https://github.com/questdb/questdb) nacio como proyecto personal de Vlad Ilyushchenko
+en 2012, en el contexto de tener que analizar **series temporales** con una base de datos relacional 
+no especializada. La historia completa, contada por el mismo, esta 
+[aqui](https://news.ycombinator.com/item?id=23975807). Hay mas estrellas implicadas, leed la historia,
+os puede servir de modelo para vuestras ideas mas absurdamente ambiciosas. 
+
+(Tengo teclado ingles britanico, sin acentos, siento las molestias :)
+
+Este tipo de datos es generado de continuo, en gran cantidad, y mientras esto ocurre, la 
 base de datos tiene que dar respuesta rapida a las herramientas que usan estos datos, sin 
 detener la ingesta y devolviendo resultados de forma interactiva, en pseudo tiempo real.
 
 Como resultado de la frustracion con las soluciones existentes, en 2018 decidimos entrar en 
-produccion con nuestro proyecto, y en 2019 creamos la empresa, porque vimos la oportunidad 
-en el mercado. Immediatamente logramos la confianza de Y-Combinator, lo que facilito capital, 
-contactos, y ayuda con la transicion de ser simplemente programadores a ser empresarios con
-un term sheet.
+produccion con nuestro proyecto, y en 2019 creamos la [empresa](https://questdb.io/), porque 
+vimos la oportunidad en el mercado. Immediatamente logramos la confianza de 
+[Y-Combinator](https://www.ycombinator.com/), lo que facilito capital, contactos, y ayuda con 
+la transicion de ser simplemente programadores, a ser empresarios con un term sheet.
 A partir de ahi nuestra plantilla crecio, enseguida llego la serie A, que resulto en una 
 muy buena posicion para nosotros. En la actualidad hemos crecido hasta ser 20, vamos rumbo 
-de ser 25, acabamos de hacer la entrega de la version 7.0.1 y pronto anunciaremos 
-disponibilidad general del servicio en nuestra plataforma en la nube. La intencion es 
-monetizar el servicio para que la companyia perdure en el tiempo y el producto se convierta 
-en el estandard de-facto.
+de ser 25, acabamos de hacer la entrega de la version 
+[7.0.1](https://github.com/questdb/questdb/releases/tag/7.0.1/) 
+y pronto anunciaremos disponibilidad general del servicio en nuestra plataforma en la 
+[nube](https://questdb.io/cloud/). La intencion es de monetizar el servicio para que la 
+empresa perdure en el tiempo y el producto se convierta en el estandard de-facto, mientras 
+mantenemos [QuestDB](https://github.com/questdb/questdb/) con codigo abierto, free, para
+beneficio de la comunidad Open Source, y de la humanidad en general. Podeis 
+[contribuir aqui](https://github.com/questdb/questdb/blob/master/CONTRIBUTING.md/) y ganaros 
+la camiseta, Javier y yo os guiaremos por el camino, sera divertido, aprenderemos todos. Pero 
+cuidado, que es un pozo muy profundo.
 
+![deep tech](images/deep_tech.png)
 
-## 2. Ejemplo de SQL
+## Ejemplo de SQL
+
+Tabla completamente aleatoria generada con datos de ordenes de compra/venta de acciones
+de mercado financiero:
 
 ```sql
 CREATE TABLE trades AS (
@@ -35,96 +51,149 @@ CREATE TABLE trades AS (
 ), INDEX(symbol capacity 128) TIMESTAMP(timestamp) PARTITION BY MONTH;
 ```
 
-Esta tabla tiene una columna `timestamp`, que es la designada para indexar los datos en el 
-tiempo, que ademas esta particionada en unidades de un mes. Si vamos al sistema de ficheros 
-podemos comprobar que hay 11 nuevas carpetas, cada una conteniendo los ficheros correspondinentes 
-a las columnas de la tabla. Esta seria una query valida:
+Esta tabla tiene una columna `TIMESTAMP` (se puede llamar como quieras), que es la **designada** 
+para indexar los datos en el tiempo. Puede haber mas columnas del tipo `TIMESTAMP`, pero solo una
+es la designada. Ojo que no es clave primaria, puede haber ducplicados, en cuyo caso estan ordenados
+por orden de insercion. Ademas, en este caso, la tabla esta particionada en unidades de un mes. Si 
+vamos al sistema de ficheros podemos comprobar que hay `N` (aleatorio) nuevas carpetas, cada una 
+conteniendo los ficheros correspondinentes a las columnas de la tabla, para una particion 
+concreta:
+
+![trades table files](images/trades_table_files.png)
+
+Esta seria una consulta valida:
 
 ```sql
 SELECT * FROM trades
 WHERE symbol='EURO' AND price > 49.99 AND amount > 15.0 AND timestamp BETWEEN '2022-12' AND '2023-02';
 ```
 
-Los datos del final de la tabla son mas valiosos, las particiones nos permiten desechar aquellas
-que no son de interes, o son antiguas, asi como acceder a los datos directamente sin necesidad de 
-escanear toda la tabla.
- 
+Por lo general, los datos del final de la tabla (mas recientes) son mas valiosos. Las particiones 
+nos permiten desechar aquellas que no son de interes, o son antiguas, asi como acceder a los datos 
+directamente sin necesidad de escanear toda la tabla.
 
-## 3. Por que Java?
+## Por que Java?
 
-En la city de Londres, Java y C++ son los lenguages estandard, son lingua franca. Ambos son usados
-para programar aplicaciones, pero quiza C++ se reserva para cuando realmente hay que sacar velocidad
-al hardware, porque es mas afin a este. Java por otro lado parece mas "estructurado" a la hora de 
-programar comparado con C++, sus herramientas son muy buenas, hay soluciones documentadas para todo, 
-es un lenguage que permite escribir un sistema grande y mantenerlo, y resulta relativamente sencillo 
-encontrar programadores.
+En la city de Londres, que es de donde venimos todos, mas o menos, Java y C++ son lenguages estandard, 
+son lingua franca. Estos son fundacionales en el sector FinTech. Ambos son usados para programar aplicaciones, 
+pero quiza C++ se reserva para cuando realmente hay que sacar velocidad al hardware, porque es mas afin a este. 
+Java por otro lado parece mas "estructurado" a la hora de programar, sus herramientas son muy buenas, 
+es un lenguage maduro en continua evolucion, hay soluciones documentadas para todo, te permite escribir un 
+sistema grande y mantenerlo.
 
 Java puede ser muy rapido, ya que te deja gestionar la memoria con llamadas de bajo nivel, de
 forma que podemos tener estructuras de datos fuera del heap, y podemos pasar un puntero a las mismas
-tanto en Java, como en C++, sin necesidad de copias, cruzando la linea a traves de JNI. La de legacion
+tanto en Java, como en C++, sin necesidad de copias, cruzando la linea a traves de JNI. La delegacion
 entre Java y C++ es como 7 ns.
 
-testJavaNativeSum, testJavaHeapSum, testNativeSum.
-
-## 4. Arquitectura
+## Arquitectura
 
 ![Arch](images/architecture.png)
 
-Lo que se ve, logicamente dividida en tres partes, la parte que le da acceso a traves de la red, mediante
-los protocols PGWire, ILP y HTTP, nuestro paquete Cutlass. Despues esta el motor SQL, nuestro paquete Griffin.
-Por ultimo esta el motor de acceso al sistema de ficheros, nuestro paquete Cairo.
+Lo que se ve, dividida en tres partes logicas:
 
-### 4.1 Storage Engine
+- La parte que le da acceso a traves de la red, mediante los protocols PGWire, ILP y HTTP. En el 
+  repositorio esta dentro del modulo **core**, el paquete se llama **cutlass**. 
+- El motor SQL, paquete **griffin**.
+- El motor de acceso al sistema de ficheros, paquete **cairo**.
+
+### Storage Engine
 
 La idea es que nuestros datos en disco tienen la misma representacion que en memoria. Dado un array creado en
-C++ y guardado en disco, tendra la misma forma y representacion cuando accedido desde Java. Evitamos cambio
-de representacion y conversiones. 
-Cada particion esta en su directorio, y en este se encuentra los ficheros de las columnas. Es una base de datos
-columnar, pero se accede de una forma similar a una base de datos relacional. Los ficheros de columnas estan
-ordenados de acuerdo con la columna timestamp, con lo que acceder a una partition es immediato, y una vez dentro
-de la misma podemos emplear busqueda binaria y escaneos de arriba abajo, o alreves. Tener particiones nos ayuda
-a tener un tamanyo de ingestion constante cuando ocurre las 24/7 horas de la semana.
+C++ y guardado en disco, tendra la misma forma y representacion cuando es accedido desde Java. Evitamos cambio
+de representacion y conversiones, y todos los datos relacionados estan juntos y alineados con el hardware. 
+Usamos las estructuras de datos correctas para el problema que estamos resolviendo y las implementamos para 
+que su formato en memoria sea igual que en disco. Sabemos todos los secretos a bajo nivel gracias a nuestro
+oscuro pasado en high frequency trading. Cada particion esta en su directorio, y en este se encuentra los 
+ficheros de las columnas. Es una base de datos columnar, pero se accede de una forma similar a una base de datos 
+relacional. Los ficheros de columnas estan ordenados de acuerdo con la columna designada como timestamp, con 
+lo que acceder a una partition es immediato, y una vez dentro de la misma podemos emplear busqueda binaria y 
+escaneos de arriba abajo, o alreves. Tener particiones nos ayuda a tener un tamanyo de ingestion constante 
+cuando ocurre 24/7 y nos permite gestionar el espacio en disco.
 
-Las columnas son de tipo fijo o de tipo variable. Si son de tipo fijo, cada valor es de un ancho en concreto.
-Si son de tipo variable entonces hay dos ficheros, el de indices (*.i) y el de datos (*.d). En el de indices
-apuntamos la direccion, u offset, donde empieza el dato en el fichero de datos, mientras que en el fichero de
-datos anotamos la longitud, seguida por los bytes que componen el dato, lo cual sirve para reducir scaneos en
-disco. Tambien existe el tipo diccionario (simbolo).
+Las columnas son de tipo fijo, o de tipo variable. Si son de tipo fijo, cada valor es de un ancho especifico 
+dentro de un fichero (*.d). Si son de tipo variable entonces hay dos ficheros, el de indices (*.i) y el 
+de datos (*.d). En el de indices apuntamos la direccion, u offset, donde empieza el dato en el fichero de datos, 
+mientras que en el fichero de datos anotamos la longitud, seguida por los bytes que componen el dato, lo cual 
+sirve para reducir scaneos en disco. Tambien existe el tipo diccionario (simbolo) que es similar a un varchar,
+pero ademas actua como conjunto, ya que no puede tener valores repetidos. Cada valor recibe un identificador 
+unico (un entero) y usamos este en lugar de la cadena de caracteres al filtrar, lo que acelera el proceso
+enormemente. Son una suerte de indices accidentales que tienen una representacion textual y, naturalmente, hay
+un fichero que contiene la relacion entre esta y el id.
 
-Al hacer un insert, puede que ocurra simplemente como append, o que haya colisiones, datos fuera de orden.
-Para ello existe una zona de memoria donde se hace el merge, ordenando, y cuando llega el commit se guarda
-ordenado. En caso de tener que hacer un merge, se abre la particion que toca y se lanza 3 tareas por columna,
-para ordenar. Penalizamos las escrituras, por lo que podriamos decir que optimizamos las lecturas.
+Al hacer una insercion de una, o multiples filas, puede que sus "timestamps" esten ordenados y sean mayores que 
+el ultimo que hay en la tabla. Esto es lo normal, este "path" esta optimizado. Pero puede que las filas lleguen 
+fuera de orden y/o, lo peor, que sean anteriores al ultimo timestamp que hay en la tabla. Para solucionar esto, 
+existe una zona de memoria donde se hace el ordenando de las filas mientras van llegando, hasta el momento del 
+"commit". En ese momento todas las filas son guardadas en el disco, ordenadas en el tiempo marcado por la columna 
+designada como la de timestamp. En caso de que exista filas pertenecientes a particiones que no estan cargadas 
+en memoria, se abre la particion, es decir se mapea el fichero, y se activa varias tareas concurrentes por columna, 
+para insertar las filas donde toque, de manera que todo este ordenado en el tiempo. Penalizamos las escrituras, 
+optimizamos las lecturas. Aun asi tenemos la capacidad de ser una estrella de neutrones, en el sentido gravitativo, 
+y tragar filas a razon de
+[~4 Miles de Millones por segundo](https://questdb.io/blog/2022/05/26/query-benchmark-questdb-versus-clickhouse-timescale/), 
+para cardinalidades (numero de columnas) grandes.
 
-Las particiones son versionadas con numero de txn a la hora de modificarlas. Los lectores pueden leer lo que
-haya disponible hasta el commit, pero no el area de O3. Cuando el commit ocurre, la nueva particion es registrada
-en el fichero de metadatos _txn y nuevos lectores pueden leer sus datos atomicamente. Estos ficheros son
-memoria compartida (los de metadatos), con lo que la sincronizacion entre dos instancias seria a traves de 
-memoria compartida. QuestDB tiene threads que borran particiones huerfanas. Transaction score-board mantiene los
-numeros de _txn de las transacciones en vuelo. Coordinacion entre lectores y escritores es por memoria compartida,
-y la clase de leer esta separada de la de escribir.
+Separamos la logica de acceso de lectura de la de escritura y las coordinamos por medio de memoria compartida
+con acceso atomico. Los escritores versionan los directorios de las particiones usando un numero de transaccion 
+a la hora de modificarlas. Cuando el commit ocurre, la nueva version es registrada en el fichero de metadatos 
+`_txn`. Los lectores consultan este fichero para saber que hay disponible en disco. Tambien tienen acceso a lo 
+que esta en la memoria reservada para el commit, por tanto aun no en disco, para aquellas filas que pertenezcan 
+a la ultima particion. Todos nuestros ficheros son memoria compartida por el pool de threads que ejecuta todas
+las tareas del sistema. Algunas de estas threads se encargan de borrar particiones cuya version sea menor que 
+la que se indica en `_txt` y para las que no hay lectores. Otro fichero de metadatos, llamado transaction 
+score-board, mantiene los numeros de version _txn de las transacciones en vuelo (para las que hay al menos un 
+lector).
 
 Esta capa da suficientes primitivas como para que la capa de computacion quede desacoplada de la capa de 
 almacenamiento.
 
-![Arch](images/FS_layout.png)
+![fs layout](images/FS_layout.png)
 
-### 4.2 Compute Engine
+### Compute Engine
 
-Esta capa simplemente toma las entradas, el SQL, y lo hace cruzar un pipeline hecho a base de operadores.
-Los operadores realizan transformaciones de datos y funciona todo a base de llamadas a funciones, que pueden
-actuar como predicados. La computacion viene definida por el function call stack. Los operadores son componentes
-reutilizables. Dependiendo de la maquina donde corramos, el optimizador de clausulas where generara filtros
-nativos (en un Mac M1 no). Hay un optimizador basado en normas, cuyo objetivo es tener un tiempo de ejecucion
-predecible, y evitar leer datos no necesarios.
-
-#### 4.2.1 Ejemplo 1
+Esta capa simplemente toma las entradas, el SQL, y lo hace cruzar un "pipeline" hecho a base de operadores.
+Los operadores realizan transformaciones de datos por medio de llamadas a funciones, que pueden actuar como 
+predicados o transformar los datos. La computacion viene definida por el function call stack. Los operadores 
+son componentes reutilizables. Dependiendo de la maquina donde corramos, el optimizador generara filtros nativos 
+reutilizables, que son compilados y guardados en la JIT cache cuando decide que es relevante. El optimizador 
+esta basado en reglas, cuyo objetivo es tener un tiempo de ejecucion predecible, y evitar leer datos no 
+necesarios. Por ejemplo:
 
 ```sql
 SELECT * FROM trades
 WHERE price > 0.1 AND time IN '2023-02-13T15';
 ```
 
-Si hay tres partitiones, dos seran no consideradas, y la tercera sera buscada mediante busqueda binaria y
-su resultado sera una fraccion de la particion. Con esto tenemos seleccionado la zona temporal en toda la
-base de datos y solo falta aplicar SIMD concurrente para encontrar que filas cumplen con la otra condicion.
+Esta consulta llega a QuestDB por algun canal en la parte logica de acceso a la red y su representacion
+en UTF-8 binario esta en un buffer. Un operador recibe el puntero al inicio de este buffer y la instruccion
+de iniciar la compilacion. En ningun momento generaremos objetos. No hay Strings per-se en nuestro repositorio. 
+Los Strings son en realidad [CharSequence](https://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html), 
+una abstraccion mayor sobre la cual nosotros podemos montar `flyweights` y emitirlos como tokens del analizador 
+lexico. El analizador sintactico producira un modelo (un POJO) que contiene todo lo necesario para que el 
+optimizador produzca un plan de ejecucion perfecto, puro como el agua de un manantial. En el ejempli, si tenemos 
+N partitiones, nuestro plan decide que N-1 no son consideradas consideradas, y la que queda es accedida mediante 
+busqueda binaria, acotando una porcion definida, ordenada, de la particion. De un paso hemos encontrado la zona 
+temporal en toda la base de datos, sea del tamanyo que sea, y solo falta aplicar un filtro. Dependiendo de nuestra 
+maquina, en el mejor caso este filtro sera codigo maquina nativo usando SIMD y ejecutado por multiples threads 
+para encontrar que filas cumplen con el predicado. El del ejemplo es simple, pero damos soporte a complejidad 
+arbitraria, siempre que se trate de expresiones aritmeticas, o de de comparacion, unidas con el operador logico
+`AND` y con algunas restricciones segun el tipo. Los registros ganadores son emitidos, organizados por filas y
+enviados de vuelta al cliente a traves del canal por el que llegaron, usando el protocolo de comunicacion 
+correspondiente.
+
+## Este repositorio
+
+Contiene dos ejemplos ejecutando QuestDB en el mismo proceso. Mostramos como crear una tabla y consultarla
+de dos formas distintas... que empiece el juego. Soy terso en esta seccion para apelar a las personas mas
+hackeras.
+
+## Conclusion
+
+Muchas gracias por atender el evento organizado por [MadridJUG](https://www.meetup.com/es-ES/madridjug/) y por 
+ser un excelente auditorio. Muchas gracias a los organizadores, un aplauso de esos de reventar el teatro, por la
+impecable ejecucion.
+
+Estemos en contacto, el mejor medio es sin duda [Slack](https://slack.questdb.io/).
+
+Aqui el enlace al video en YouTube <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
