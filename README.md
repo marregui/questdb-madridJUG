@@ -227,7 +227,7 @@ Muchas gracias por atender el evento organizado por [MadridJUG](https://www.meet
 ser un excelente auditorio. Muchas gracias a los organizadores, un aplauso de esos de reventar el teatro, por la
 impecable ejecucion.
 
-Estemos en contacto, el mejor medio es sin duda [Slack](https://slack.questdb.io/).
+Estemos en **contacto**, el mejor medio es sin duda **Slack** <https://slack.questdb.io/>.
 
 El encuentro en **YouTube** <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
 
