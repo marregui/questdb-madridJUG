@@ -232,4 +232,5 @@ Estemos en contacto, el mejor medio es sin duda [Slack](https://slack.questdb.io
 El encuentro en **YouTube** <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
 
 **Documentacion** <https://questdb.io/docs/>.
-**swag/comunidad** <https://questdb.io/community/>.
+
+**Swag/Comunidad** <https://questdb.io/community/>.
