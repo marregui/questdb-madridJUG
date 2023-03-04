@@ -1,5 +1,5 @@
 
-# questdb-madridJUG
+# Java de alto rendimiento: cuando las librerías estándar tardan demasiados nanosegundos
 
 ## De donde sale el proyecto? 
 
@@ -169,7 +169,7 @@ de metadatos, llamado transaction `score-board`, mantiene los numeros de version
 vuelo (para las que hay al menos un lector).
 
 Esta capa logica da suficientes primitivas como para que la capa de computacion quede desacoplada del 
-almacenamiento.
+almacenamiento. Mas informacion aqui <https://questdb.io/docs/concept/storage-model/>.
 
 ![fs layout](images/FS_layout.png)
 
@@ -179,9 +179,9 @@ Esta capa simplemente toma las entradas, el SQL, y lo hace cruzar un "pipeline" 
 Los operadores son componentes reutilizables que realizan transformaciones de datos por medio de llamadas a 
 funciones, que pueden actuar como predicados, o transformar los datos. La computacion viene definida por el 
 function call stack. Dependiendo de la maquina donde corramos, el optimizador generara filtros nativos, 
-tambien reutilizables, que son compilados y guardados en la cache JIT cuando decide que es relevante. El 
-optimizador esta basado en reglas, cuyo objetivo es tener un tiempo de ejecucion predecible, y evitar leer 
-datos no necesarios. Por ejemplo:
+tambien reutilizables, que son [compilados](https://questdb.io/docs/concept/jit-compiler/) y guardados en 
+la cache JIT cuando decide que es relevante. El optimizador esta basado en reglas, cuyo objetivo es tener 
+un tiempo de ejecucion predecible, y evitar leer datos no necesarios. Por ejemplo:
 
 ```sql
 SELECT * FROM trades
@@ -191,16 +191,15 @@ WHERE price > 0.1 AND time IN '2023-02-13T15';
 Esta consulta llega a `QuestDB` por algun canal de la capa logica de acceso a la red y su representacion
 en UTF-8 binario esta en un buffer del sistema operativo. Un operador recibe el puntero al inicio de este 
 buffer y la instruccion de arrancar la compilacion del SQL. 
-
 En ningun momento generaremos objetos. No hay Strings per-se en nuestro repositorio. Los Strings son en realidad 
 instancias de [CharSequence](https://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html), una 
 abstraccion mayor sobre la cual nosotros podemos montar `flyweights` y emitirlos como tokens del analizador lexico. 
 El analizador sintactico producira un modelo (un POJO) que contiene todo lo necesario para que el optimizador 
 produzca un plan de ejecucion perfecto, puro como el agua de un manantial. En el ejemplo, si tenemos `N` partitiones, 
 nuestro plan decide que N-1 no son consideradas, y la que queda es accedida mediante busqueda binaria
-vectorizada, acotando una porcion definida, ordenada en el tiempo, de la particion. De un paso hemos encontrado 
-la zona temporal en toda la base de datos, sea del tamanyo que sea, y solo falta aplicar un filtro. Dependiendo 
-de nuestra maquina, de su arquitectura, en el mejor caso este filtro sera codigo maquina nativo usando SIMD y 
+vectorizada, acotando una porcion definida de la particion, ordenada en el tiempo. De un paso hemos encontrado 
+la zona temporal dentro de toda la base de datos, sea del tamanyo que sea, y solo falta aplicar un filtro. Dependiendo 
+de nuestra maquina, de su arquitectura, en el mejor caso este filtro sera codigo maquina nativo usando `SIMD` y 
 ejecutado por multiples threads para encontrar las filas que cumplen con el predicado. El del ejemplo es simple,
 pero damos soporte a complejidad arbitraria, siempre que se trate de expresiones aritmeticas, o de comparacion, 
 unidas mediante el operador logico `AND` y con algunas restricciones segun el tipo de la columna. Los registros 
@@ -211,7 +210,7 @@ vuelta al cliente a traves del canal por el que llego la consulta, usando el pro
 
 Contiene dos ejemplos ejecutando `QuestDB` en el mismo proceso. Siguen el mismo guion:
 
-1. Configurar el entorno de ejecucion de `QuestDB`.
+1. Configurar el [entorno](https://questdb.io/docs/concept/root-directory-structure/) de ejecucion de `QuestDB`.
 2. Arrancar el servidor.
 3. Ejecutar una query que crea una tabla llena de datos aleatorios.
 4. Ejecutar una query de seleccion, con filtros.
@@ -219,8 +218,8 @@ Contiene dos ejemplos ejecutando `QuestDB` en el mismo proceso. Siguen el mismo 
 
 La diferencia esta en que:
 
-- SameProcessThroughPgWire: Se conecta mediante un JDBC driver para Postgres.
-- SameProcessThroughCompiler: Directamente compila, ejecuta y accede al resultado.
+- `SameProcessThroughPgWire`: Se conecta mediante un JDBC driver para Postgres.
+- `SameProcessThroughCompiler`: Directamente compila, ejecuta y accede al resultado.
 
 ## Conclusion
 
@@ -230,4 +229,6 @@ impecable ejecucion.
 
 Estemos en contacto, el mejor medio es sin duda [Slack](https://slack.questdb.io/).
 
-Aqui el enlace al video en YouTube <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
+Aqui el enlace al encuentro en **YouTube** <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
+Aqui el enlace a la documentacion <https://questdb.io/docs/>.
+Aqui el enlace al "swag" <https://questdb.io/community/>.
