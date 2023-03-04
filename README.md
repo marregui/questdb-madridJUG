@@ -229,6 +229,7 @@ impecable ejecucion.
 
 Estemos en contacto, el mejor medio es sin duda [Slack](https://slack.questdb.io/).
 
-Aqui el enlace al encuentro en **YouTube** <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
-Aqui el enlace a la documentacion <https://questdb.io/docs/>.
-Aqui el enlace al "swag" <https://questdb.io/community/>.
+El encuentro en **YouTube** <https://www.youtube.com/watch?v=iyZYBstAP7Y>.
+
+**Documentacion** <https://questdb.io/docs/>.
+**swag/comunidad** <https://questdb.io/community/>.
