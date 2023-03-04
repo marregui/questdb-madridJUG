@@ -149,9 +149,10 @@ fuera de orden y/o, lo peor, que sean anteriores al ultimo timestamp que hay en 
 existe una zona de memoria donde se hace el ordenando de las filas mientras van llegando, hasta el momento del 
 "commit". En ese momento todas las filas son guardadas en el disco, ordenadas en el tiempo marcado por la columna 
 designada como la de timestamp. En caso de que exista filas pertenecientes a particiones que no estan cargadas 
-en memoria, se abre la particion, es decir se mapea el fichero, y se activa varias tareas concurrentes por columna, 
-para insertar las filas donde toque, de manera que todo este ordenado en el tiempo. Penalizamos las escrituras, 
-optimizamos las lecturas. Aun asi tenemos la capacidad de ser una estrella de neutrones, en el sentido gravitativo, 
+en memoria, se abre la particion, es decir se mapean los ficheros de las columnas pertinentes, y se activa varias 
+tareas concurrentes por columna, para insertar las filas donde toque, de manera que todo este ordenado en el 
+tiempo, a la vez que corelacionado por offset. Penalizamos las escrituras, optimizamos las lecturas. Aun asi 
+tenemos la capacidad de ser una estrella de neutrones, en el sentido gravitativo, 
 e ingerir filas a razon de
 [~4 Miles de Millones por segundo](https://questdb.io/blog/2022/05/26/query-benchmark-questdb-versus-clickhouse-timescale/), 
 para cardinalidades (numero de columnas) altas.
